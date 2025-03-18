@@ -16,7 +16,10 @@ struct Args {
     #[arg(short = 'x', long, help = "Execute renaming (disable DRY-RUN mode)")]
     execute: bool,
 
-    #[arg(required=true, help = "Target directories or files")]
+    #[arg(short, long, help = "Allow all rename confirmations")]
+    yes: bool,
+
+    #[arg(required = true, help = "Target directories or files")]
     path: Vec<PathBuf>,
     //#[arg(short, long, help = "Glob pattern of target directories or files")]
     //glob: Vec<String>,
@@ -71,6 +74,7 @@ fn main() -> Result<(), AppError> {
     save_to_definition_file(&definition_file_path, &origin)?;
 
     // Edit definition file with text editor
+    println!("Launching text editor...");
     editor::execute_editor(args.editor.as_str(), &definition_file_path)?;
 
     // Load renamed entries from edited definition file
@@ -79,7 +83,8 @@ fn main() -> Result<(), AppError> {
     renamer::rename(
         &origin,
         &renamed.iter().collect::<Vec<&PathBuf>>(),
-        args.execute,
+        !args.execute,
+        !args.yes,
     )?;
 
     Ok(())
@@ -149,27 +154,54 @@ mod renamer {
 
         #[error("Failed to rename {0} -> {1}: {2}")]
         RenameFailure(PathBuf, PathBuf, std::io::Error),
+
+        #[error("CLI Error: {0}")]
+        Cli(#[from] crate::cli::CliError),
     }
 
     pub fn rename<P: AsRef<Path>>(
         origin: &[P],
         renamed: &[P],
-        execute: bool,
+        dry_run: bool,
+        confirm: bool,
     ) -> Result<(), RenameError> {
         let changed = list_changed(origin, renamed)?;
-        if changed.len() == 0 {
-            println!("Nothing to changed")
+
+        if changed.is_empty() {
+            println!("Nothing to change");
+            return Ok(());
         }
+
         for (src, dest) in changed {
-            if execute {
+            if dry_run {
+                print!(
+                    concat!(
+                        //
+                        "DRY RUN    {}\n",
+                        "       --> {}\n",
+                    ),
+                    src.to_string_lossy(),
+                    dest.to_string_lossy()
+                );
+                continue;
+            } else {
+                if confirm {
+                    print!(
+                        concat!(
+                            //
+                            "RENAME     {}\n",
+                            "       --> {}\n",
+                        ),
+                        src.to_string_lossy(),
+                        dest.to_string_lossy()
+                    );
+                    if !crate::cli::confirm("Accept the rename?")? {
+                        continue;
+                    }
+                }
+
                 std::fs::rename(&src, &dest)
                     .map_err(|err| RenameError::RenameFailure(src, dest, err))?;
-            } else {
-                println!(
-                    "[DRYRUN] {} -> {}",
-                    &src.to_string_lossy(),
-                    &dest.to_string_lossy()
-                );
             }
         }
 
@@ -193,5 +225,26 @@ mod renamer {
         }
 
         Ok(changed)
+    }
+}
+
+mod cli {
+    use inquire;
+    use std::io::Write;
+
+    #[derive(Debug, thiserror::Error)]
+    pub enum CliError {
+        #[error("Prompt error: {0}")]
+        Prompt(#[from] inquire::error::InquireError),
+
+        #[error("failed read line: {0}")]
+        ReadLine(std::io::Error),
+    }
+
+    pub fn confirm(prompt: &str) -> Result<bool, CliError> {
+        let accept = inquire::Confirm::new(prompt).with_default(true).prompt()?;
+        println!("");
+
+        Ok(accept)
     }
 }
