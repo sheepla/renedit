@@ -1,0 +1,10 @@
+[package]
+name = "renedit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.32", features = ["derive", "env"] }
+tempfile = "3.19.0"
+thiserror = "2.0.12"
+which = "7.0.2"
