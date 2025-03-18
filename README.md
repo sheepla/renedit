@@ -10,6 +10,11 @@ A simple and efficient command line bulk file renaming tool that works in concer
 
 </div>
 
+## Demo
+
+
+[Demo.webm](https://github.com/user-attachments/assets/2d89b984-bd6a-4eb0-be7a-f8365d8b5fc1)
+
 ## Features
 
 - Efficient batch renaming workflow: 💨 Run → 🗒️Edit → 💾 Save → ✨ Rename
