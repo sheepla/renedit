@@ -35,6 +35,7 @@ Options:
   -e, --editor <EDITOR>                    Command of text editor [env: EDITOR=nvim]
   -d, --definition-file <DEFINITION_FILE>  Path to definition file
   -x, --execute                            Execute renaming (disable DRY-RUN mode)
+  -y, --yes                                Allow all rename confirmations
   -h, --help                               Print help
 ```
 
