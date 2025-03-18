@@ -46,7 +46,7 @@ Options:
 
 ## Installation
 
-To build from source, run `cargo install --path=.`
+To build from source, clone this repository and run `cargo install --path=.`
 
 ## License
 
