@@ -42,7 +42,10 @@ Options:
 1. 💨 **Run**: Run this command like: `renedit --editor nvim path/to/files --execute`
 1. 🗒️**Edit**: When the command is invoked, the editor is automatically launched. A text file with the path to the file will open, edit it to the name you want to change
 1. 💾 **Save**: Overwrites the file and exits. For example, in Vim/Neovim, type `:wq`.
-1. ✨ **Rename**: If the `-x`, `--execute` option is specified, you can batch rename to the changed name when you exit the editor. If not specified, the paths before and after the rename will be displayed.
+1. ✨ **Rename**: 
+    - If the `-x`, `--execute` option is specified, you can batch rename to the changed name when you exit the editor. If not specified, the paths before and after the rename will be displayed.
+    - When renaming, type `y`, `yes` or `Enter` at the confirmation prompt. 
+    - If you specify the `-y` or `--yes` option at startup, you can skip the confirmation and execute the renaming at once.
 
 
 ## Installation
@@ -52,6 +55,10 @@ To build from source, clone this repository and run `cargo install --path=.`
 ## License
 
 MIT
+
+## Thanks
+
+This tool was inspired by [itchyny/mmv](https://github.com/itchyny/mmv) written in Go, Thanks!
 
 ## Author
 
